@@ -189,18 +189,31 @@ extension RAMAnimatedTabBarController {
 open class RAMAnimatedTabBarController: UITabBarController {
 
     fileprivate var containers: [String: UIView] = [:]
-    
+
     open override var viewControllers: [UIViewController]? {
         didSet {
             initializeContainers()
         }
     }
-    
+
     open override func setViewControllers(_ viewControllers: [UIViewController]?, animated: Bool) {
         super.setViewControllers(viewControllers, animated: animated)
         initializeContainers()
     }
-    
+
+    open override var selectedIndex: Int {
+        didSet {
+            if isViewLoaded, let items = tabBar.items as? [RAMAnimatedTabBarItem] {
+                if oldValue < items.count {
+                    items[oldValue].deselectAnimation()
+                }
+                if selectedIndex != 2 {
+                    items[selectedIndex].selectedState()
+                }
+            }
+        }
+    }
+
     // MARK: life circle
 
     open override func viewDidLoad() {
@@ -209,7 +222,7 @@ open class RAMAnimatedTabBarController: UITabBarController {
     }
 
     fileprivate func initializeContainers() {
-        
+
         containers.values.forEach { $0.removeFromSuperview() }
         containers = createViewContainers()
 
@@ -270,9 +283,9 @@ open class RAMAnimatedTabBarController: UITabBarController {
             }
             item.iconView = (icon: icon, textLabel: textLabel)
 
-            if 0 == index { // selected first elemet
-                item.selectedState()
-                container.backgroundColor = (items as [RAMAnimatedTabBarItem])[index].bgSelectedColor
+            if selectedIndex == index { // selected first elemet
+//                item.selectedState()
+//                container.backgroundColor = (items as [RAMAnimatedTabBarItem])[index].bgSelectedColor
             }
 
             item.image = nil
